@@ -1,42 +1,32 @@
+// Server failure module
 #include "ProjectHeaders.h"
+// request from a failed server goes back to the queue
+void LoadBalancer::moveBack(Request r) {
+    r.moves++;
+    if (r.moves > 3) {
+        failedRequests++;
+        log->write(time, "REQUEST FAILED", info(r) + " - moved more than 3 times");
+        return;
+    }
+    if (!waiting.enqueue(r)) {
+        rejected++;
+        log->write(time, "REJECTED", info(r) + " - queue is full");
+    } else {
+        log->write(time, "MOVED", info(r) + " -> back to the waiting queue");
+    }
+}
 
 bool LoadBalancer::failServer(int id) {
-    int index = findServerIndex(id);
-
-    if (index == -1) {
-        cout << "Server not found.\n";
+    Server* s = findServer(id);
+    if (s == NULL || !s->isActive())
         return false;
-    }
 
-    if (!servers[index].active) {
-        cout << "Server is already failed.\n";
-        return false;
-    }
-
-    servers[index].active = false;
-    vector<Request> current = activeQueue.toVector();
-    vector<Request> remaining;
-
-    for (Request r : current) {
-        if (r.serverId == id) {
-            r.serverId = -1;
-
-            if (waitingQueue.enqueue(r)) {
-                cout << "Request " << r.id
-                     << " interrupted and returned to waiting queue.\n";
-            } else {
-                cout << "Waiting queue full; Request " << r.id
-                     << " could not be requeued.\n";
-            }
-        } else {
-            remaining.push_back(r);
-        }
-    }
-
-    activeQueue.rebuild(remaining);
-    servers[index].currentLoad = 0;
-
-    cout << "Server " << id << " FAILED.\n";
-    assignWaiting();
+    vector<Request> pending = s->fail();
+    serverFailures++;
+    log->write(time, "FAILED", "Server " + to_string(id) + " failed | " +
+               to_string(pending.size()) + " requests will be moved");
+    for (int i = 0; i < (int)pending.size(); i++)
+        moveBack(pending[i]);
+    assignRequests();
     return true;
 }
