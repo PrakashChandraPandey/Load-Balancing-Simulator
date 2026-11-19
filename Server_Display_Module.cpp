@@ -1,9 +1,10 @@
 #include "ProjectHeaders.h"
-
-void LoadBalancer::displayServers() const {
-    cout << "\n========== SERVERS ==========\n";
-
-    for (const Server &s : servers) {
-        s.display();
-    }
+void LoadBalancer::showServers() {
+    cout << "\n========== STATUS AT " << time << " sec ==========" << endl;
+    cout << "Algorithm   : " << getAlgorithmName() << " (selected automatically)" << endl;
+    cout << "Reason      : " << getAlgorithmReason() << endl;
+    cout << "Scaling     : " << getScalingMode() << " | vertical step: " << getScalingStep() << endl;
+    cout << "Utilization : " << getUtilization() << "%" << endl << endl;
+    for (int i = 0; i < (int)servers.size(); i++)
+        servers[i]->display();
 }
