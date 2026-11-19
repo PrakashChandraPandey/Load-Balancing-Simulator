@@ -1,29 +1,23 @@
-#include "ProjectHeaders.h"
+// Request module
+#include "data_structures.h"
+#include <string.h>
 
-Request::Request() {
-    id = 0;
-    processingTime = 0;
-    remainingTime = 0;
-    serverId = -1;
-}
-
-Request::Request(int requestId) {
-    id = requestId;
-    processingTime = 1 + rand() % 5;
-    remainingTime = processingTime;
-    serverId = -1;
-}
-
-LBRequestData Request::toCData() const {
-    LBRequestData data = {id, processingTime, remainingTime, serverId};
-    return data;
-}
-
-Request Request::fromCData(const LBRequestData &data) {
+Request makeRequest(int id, const char *path, int time, int arrival)
+{
     Request r;
-    r.id = data.id;
-    r.processingTime = data.processingTime;
-    r.remainingTime = data.remainingTime;
-    r.serverId = data.serverId;
+    r.id = id;
+    strcpy(r.path, path);
+    r.time = time;
+    r.remaining = time;
+    r.arrival = arrival;
+    r.start = -1;
+    r.moves = 0;
     return r;
+}
+
+int waitTime(Request r)
+{
+    if (r.start == -1)
+        return 0;
+    return r.start - r.arrival;
 }
