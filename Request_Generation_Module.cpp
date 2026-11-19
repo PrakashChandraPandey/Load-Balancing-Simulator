@@ -1,30 +1,37 @@
 #include "ProjectHeaders.h"
+#include <cstdlib>
 
-void LoadBalancer::generateRequests(int number, int algorithmChoice) {
-    if (number <= 0) {
-        cout << "Enter a positive number of requests.\n";
-        return;
-    }
+const char* paths[6] = {"/login", "/browse", "/search", "/upload", "/report", "/video"};
+const int minTime[6] = {1, 3, 11, 15, 21, 25};
+const int maxTime[6] = {3, 5, 15, 20, 25, 30};
 
-    if (algorithmChoice < 1 || algorithmChoice > 3) {
-        cout << "Invalid algorithm choice.\n";
-        return;
-    }
-
-    algorithm = algorithmChoice;
-
-    for (int i = 0; i < number; i++) {
-        Request r(nextRequestId++);
-
-        if (!waitingQueue.enqueue(r)) {
-            cout << "Waiting queue is full.\n";
-            break;
-        }
-
-        cout << "Generated Request " << r.id
-             << " | Processing time: " << r.processingTime << " sec\n";
-    }
-
-    assignWaiting();
+RequestGenerator::RequestGenerator() {
+    nextId = 1;
+    testMode = false;
 }
 
+void RequestGenerator::setTestMode(bool mode) {
+    testMode = mode;
+}
+
+int RequestGenerator::randomBetween(int low, int high) {
+    return low + rand() % (high - low + 1);
+}
+
+Request RequestGenerator::next(int time) {
+    int k;
+    if (testMode) {
+        k = 1;                          // /browse
+    } else {
+        int r = rand() % 100;
+        if (r < 70)
+            k = randomBetween(0, 1);    // short
+        else if (r < 90)
+            k = randomBetween(2, 3);    // medium
+        else
+            k = randomBetween(4, 5);    // long
+    }
+    Request req = makeRequest(nextId, paths[k], randomBetween(minTime[k], maxTime[k]), time);
+    nextId++;
+    return req;
+}
