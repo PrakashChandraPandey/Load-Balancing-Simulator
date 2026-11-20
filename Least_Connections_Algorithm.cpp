@@ -1,21 +1,18 @@
 #include "ProjectHeaders.h"
+string LeastConnections::name() {
+    return "Least Connections";
+}
 
-int LoadBalancer::leastConnections() {
-    int selected = -1;
-    int minimum = 0;
-
+Server* LeastConnections::select(vector<Server*>& servers) {
+    Server* best = NULL;
     for (int i = 0; i < (int)servers.size(); i++) {
-        if (!canAccept(i)) {
+        if (!servers[i]->isAvailable())
             continue;
-        }
-
-        int connections = countConnections(servers[i].id);
-
-        if (selected == -1 || connections < minimum) {
-            selected = i;
-            minimum = connections;
-        }
+        if (best == NULL || servers[i]->loadRatio() < best->loadRatio())
+            best = servers[i];
     }
-
-    return selected;
+    if (best != NULL)
+        reason = "least loaded (" + to_string(best->getLoad()) + "/" +
+                 to_string(best->getCapacity()) + ")";
+    return best;
 }
