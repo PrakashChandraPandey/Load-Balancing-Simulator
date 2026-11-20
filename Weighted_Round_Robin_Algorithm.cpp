@@ -1,30 +1,30 @@
 #include "ProjectHeaders.h"
+WeightedRoundRobin::WeightedRoundRobin() {
+    current = 0;
+    given = 0;
+}
 
-int LoadBalancer::weightedRoundRobin() {
-    vector<int> choices;
+string WeightedRoundRobin::name() {
+    return "Weighted Round Robin";
+}
 
-    for (int i = 0; i < (int)servers.size(); i++) {
-        if (!canAccept(i)) {
-            continue;
+Server* WeightedRoundRobin::select(vector<Server*>& servers) {
+    int n = servers.size();
+    if (n == 0)
+        return NULL;
+
+    for (int i = 0; i <= n; i++) {
+        if (current >= n)
+            current = 0;
+        Server* s = servers[current];
+        if (s->isAvailable() && given < s->getCapacity()) {
+            given++;
+            reason = "weight " + to_string(s->getCapacity()) + ", request " +
+                     to_string(given) + " of its turn";
+            return s;
         }
-
-        int weight = servers[i].weight;
-        if (weight < 1) {
-            weight = 1;
-        }
-
-        for (int j = 0; j < weight; j++) {
-            choices.push_back(i);
-        }
+        current = (current + 1) % n;   
+        given = 0;
     }
-
-    if (choices.empty()) {
-        return -1;
-    }
-
-    weightedPosition = weightedPosition % (int)choices.size();
-    int selected = choices[weightedPosition];
-    weightedPosition = (weightedPosition + 1) % (int)choices.size();
-
-    return selected;
+    return NULL;
 }
