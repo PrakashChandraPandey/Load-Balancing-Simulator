@@ -1,20 +1,21 @@
 #include "ProjectHeaders.h"
+RoundRobin::RoundRobin() {
+    next = 0;
+}
 
-int LoadBalancer::roundRobin() {
-    int n = (int)servers.size();
+string RoundRobin::name() {
+    return "Round Robin";
+}
 
-    if (n == 0) {
-        return -1;
-    }
-
+Server* RoundRobin::select(vector<Server*>& servers) {
+    int n = servers.size();
     for (int i = 0; i < n; i++) {
-        int index = (rrPosition + i) % n;
-
-        if (canAccept(index)) {
-            rrPosition = (index + 1) % n;
-            return index;
+        int k = (next + i) % n;
+        if (servers[k]->isAvailable()) {
+            next = (k + 1) % n;
+            reason = "next in turn";
+            return servers[k];
         }
     }
-
-    return -1;
+    return NULL;   // no server is free
 }
