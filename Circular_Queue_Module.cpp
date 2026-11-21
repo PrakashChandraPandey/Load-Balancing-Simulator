@@ -1,61 +1,46 @@
 #include "ProjectHeaders.h"
 
-CircularQueue::CircularQueue(int capacity) {
-    // The C queue has a fixed size, so capacity is not needed here.
-    (void)capacity;
-    lb_queue_init(&queue);
+CircularQueue::CircularQueue() {
+    q = createQueue(QUEUE_SIZE);
 }
 
 CircularQueue::~CircularQueue() {
+    freeQueue(q);
 }
 
-bool CircularQueue::isEmpty() const {
-    return lb_queue_empty(&queue) != 0;
+bool CircularQueue::isEmpty() {
+    return queueEmpty(q);
 }
 
-bool CircularQueue::isFull() const {
-    return lb_queue_full(&queue) != 0;
+bool CircularQueue::isFull() {
+    return queueFull(q);
 }
 
-int CircularQueue::size() const {
-    return lb_queue_size(&queue);
+int CircularQueue::size() {
+    return q->count;
 }
 
-bool CircularQueue::enqueue(const Request &r) {
-    return lb_queue_enqueue(&queue, r.toCData()) != 0;
+bool CircularQueue::enqueue(Request r) {
+    return ::enqueue(q, r) == 1;
 }
 
-bool CircularQueue::dequeue(Request &r) {
-    LBRequestData data;
 
-    if (!lb_queue_dequeue(&queue, &data)) {
-        return false;
-    }
-
-    r = Request::fromCData(data);
-    return true;
+Request CircularQueue::dequeue() {
+    return ::dequeue(q);
 }
 
-vector<Request> CircularQueue::toVector() const {
-    vector<Request> result;
-
-    for (int i = 0; i < size(); i++) {
-        LBRequestData data;
-
-        if (lb_queue_copy_at(&queue, i, &data)) {
-            result.push_back(Request::fromCData(data));
-        }
-    }
-
-    return result;
+Request CircularQueue::at(int i) {
+    return queueAt(q, i);
 }
 
-void CircularQueue::rebuild(const vector<Request> &remaining) {
-    lb_queue_clear(&queue);
+Request CircularQueue::slot(int index) {
+    return q->arr[index];
+}
 
-    for (const Request &r : remaining) {
-        if (!enqueue(r)) {
-            break;
-        }
-    }
+int CircularQueue::getFront() {
+    return q->front;
+}
+
+int CircularQueue::getRear() {
+    return q->rear;
 }
