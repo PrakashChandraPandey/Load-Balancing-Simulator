@@ -1,28 +1,15 @@
 #include "ProjectHeaders.h"
+void LoadBalancer::showQueue() {
+    cout << "\nWaiting requests (circular queue): front = " << waiting.getFront()
+         << ", rear = " << waiting.getRear() << ", count = " << waiting.size() << endl;
 
-void LoadBalancer::displayQueues() const {
-    cout << "\n========== ACTIVE REQUESTS ==========\n";
-    vector<Request> active = activeQueue.toVector();
-
-    if (active.empty()) {
-        cout << "No active requests.\n";
+    if (waiting.isEmpty()) {
+        cout << "  empty" << endl;
+        return;
     }
-
-    for (const Request &r : active) {
-        cout << "Request " << r.id
-             << " | Server " << r.serverId
-             << " | Remaining time: " << r.remainingTime << " sec\n";
+    for (int i = 0; i < waiting.size(); i++) {
+        Request r = waiting.at(i);
+        cout << "  [R" << r.id << " " << r.path << " " << r.time << "s]";
     }
-
-    cout << "\n========== WAITING REQUESTS ==========\n";
-    vector<Request> waiting = waitingQueue.toVector();
-
-    if (waiting.empty()) {
-        cout << "No waiting requests.\n";
-    }
-
-    for (const Request &r : waiting) {
-        cout << "Request " << r.id
-             << " | Remaining time: " << r.remainingTime << " sec\n";
-    }
+    cout << endl;
 }
