@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     lb = NULL;
     shownLines = 0;
 
-    setWindowTitle("Multi-Algorithm Load Balancing Simulator");
+    setWindowTitle("Load Balancing Simulator");
     resize(1300, 860);
     setStyleSheet(
         "QWidget { color: #1f2328; font-size: 13px; }"
@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // ================= left side =================
     QVBoxLayout* left = new QVBoxLayout;
 
-    QLabel* title = new QLabel("Multi-Algorithm Load Balancing Simulator");
+    QLabel* title = new QLabel("Load Balancing Simulator");
     title->setWordWrap(true);
     title->setStyleSheet("font-size: 17px; font-weight: bold;");
     left->addWidget(title);
